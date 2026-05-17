@@ -1,0 +1,15 @@
+app_name: mydaemon
+debug: false
+log_path: /var/log/mydaemon/mydaemon.log
+max_log_size: 100  # MB
+max_log_backups: 10
+
+# Monitoring intervals in seconds
+cpu_monitor_interval: 5
+memory_monitor_interval: 5
+disk_monitor_interval: 10
+network_monitor_interval: 10
+
+# Alert thresholds (percentages)
+cpu_threshold: 80.0
+memory_threshold: 80.0

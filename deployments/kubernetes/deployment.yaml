@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mydaemon
+  namespace: default
+  labels:
+    app: mydaemon
+    version: v1
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: mydaemon
+  template:
+    metadata:
+      labels:
+        app: mydaemon
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      serviceAccountName: mydaemon
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+      - name: mydaemon
+        image: mydaemon:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: metrics
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: LOG_LEVEL
+          value: "info"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: config
+          mountPath: /etc/mydaemon
+          readOnly: true
+        - name: logs
+          mountPath: /var/log/mydaemon
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: config
+        configMap:
+          name: mydaemon-config
+      - name: logs
+        emptyDir: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mydaemon-config
+  namespace: default
+data:
+  mydaemon.yaml: |
+    app_name: mydaemon
+    debug: false
+    log_path: /var/log/mydaemon/mydaemon.log
+    max_log_size: 100
+    max_log_backups: 10
+    cpu_monitor_interval: 5
+    memory_monitor_interval: 5
+    disk_monitor_interval: 10
+    network_monitor_interval: 10
+    cpu_threshold: 80.0
+    memory_threshold: 80.0
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mydaemon
+  namespace: default

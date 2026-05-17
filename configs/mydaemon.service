@@ -1,0 +1,26 @@
+[Unit]
+Description=MyDaemon - System Monitoring Service
+Documentation=file:///usr/share/doc/mydaemon/docs/
+After=network.target
+
+[Service]
+Type=simple
+User=daemon
+Group=daemon
+ExecStart=/usr/local/bin/mydaemon -config /etc/mydaemon/mydaemon.yaml
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+Restart=on-failure
+RestartSec=10s
+StandardOutput=journal
+StandardError=journal
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/mydaemon /var/run/mydaemon
+
+[Install]
+WantedBy=multi-user.target
