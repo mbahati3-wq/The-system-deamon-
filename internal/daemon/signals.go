@@ -25,12 +25,10 @@ func HandleSignals(d *Daemon) {
 
 			case syscall.SIGHUP:
 				log.Println("Received SIGHUP, reloading configuration...")
-				// TODO: Implement configuration reload logic
-				d.logger.Info("Configuration reload requested")
+				d.TriggerReload()
 
 			case syscall.SIGUSR1:
 				log.Println("Received SIGUSR1, printing stats...")
-				// TODO: Implement stats printing logic
 				d.logger.Info("Statistics requested")
 
 			default:

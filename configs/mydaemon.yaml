@@ -13,3 +13,16 @@ network_monitor_interval: 10
 # Alert thresholds (percentages)
 cpu_threshold: 80.0
 memory_threshold: 80.0
+
+# Health check endpoint
+health_check_port: 8080
+
+# Prometheus metrics (optional)
+enable_metrics: false
+metrics_port: 9090
+
+# Process monitoring (optional)
+processes: []
+  # - nginx
+  # - redis-server
+  # - postgresql
